@@ -126,88 +126,141 @@ function App() {
         return;
       }
 
-      // Get the React Flow container element
-      const reactFlowElement = document.querySelector(".react-flow");
+      const reactFlowElement =
+        document.querySelector(".react-flow__viewport") ||
+        document.querySelector(".react-flow") ||
+        document.querySelector("[data-testid='rf__wrapper']");
 
       if (!reactFlowElement) {
         alert("Canvas not found. Please try again.");
         return;
       }
 
-      // Get the download button for status updates
       const downloadButton =
         document.getElementById("download-btn") ||
-        document.querySelector(".btn-action");
-      const originalText = downloadButton.textContent;
+        document.querySelector(".btn-action") ||
+        Array.from(document.querySelectorAll("button")).find((btn) =>
+          btn.textContent.includes("Download")
+        );
 
-      // Update button to show loading state
-      downloadButton.textContent = "⏳ Generating...";
-      downloadButton.disabled = true;
+      let originalText = "Download Image";
+      if (downloadButton) {
+        originalText = downloadButton.textContent;
+        downloadButton.textContent = "⏳ Generating...";
+        downloadButton.disabled = true;
+      }
 
-      // Add a small delay to ensure the UI updates
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-      // Configure html2canvas options for better quality
+      const reactFlowWrapper =
+        reactFlowElement.closest(".react-flow") || reactFlowElement;
+
       const options = {
         backgroundColor: darkMode ? "#0d0d0d" : "#fafafa",
-        scale: 2, // Higher resolution for crisp images
+        scale: 1.5,
         useCORS: true,
-        allowTaint: true,
-        foreignObjectRendering: true,
+        allowTaint: false,
+        foreignObjectRendering: false, 
         logging: false,
-        width: reactFlowElement.scrollWidth,
-        height: reactFlowElement.scrollHeight,
-        scrollX: 0,
-        scrollY: 0,
+        removeContainer: true,
+        imageTimeout: 15000, 
         onclone: (clonedDoc) => {
-          // Ensure all styles are applied to the cloned document
-          const clonedReactFlow = clonedDoc.querySelector(".react-flow");
-          if (clonedReactFlow) {
-            clonedReactFlow.style.width = reactFlowElement.scrollWidth + "px";
-            clonedReactFlow.style.height = reactFlowElement.scrollHeight + "px";
+          try {
+            const clonedElement =
+              clonedDoc.querySelector(".react-flow__viewport") ||
+              clonedDoc.querySelector(".react-flow");
+
+            if (clonedElement) {
+              clonedElement.style.position = "static";
+              clonedElement.style.transform = "none";
+              clonedElement.style.visibility = "visible";
+              clonedElement.style.opacity = "1";
+
+              const nodes = clonedElement.querySelectorAll(".react-flow__node");
+              nodes.forEach((node) => {
+                node.style.position = "absolute";
+                node.style.visibility = "visible";
+                node.style.opacity = "1";
+              });
+
+              const edges = clonedElement.querySelectorAll(".react-flow__edge");
+              edges.forEach((edge) => {
+                edge.style.visibility = "visible";
+                edge.style.opacity = "1";
+              });
+            }
+          } catch (cloneError) {
+            console.warn("Error in onclone:", cloneError);
           }
         },
       };
 
       // Generate the canvas
-      const canvas = await html2canvas(reactFlowElement, options);
+      const canvas = await html2canvas(reactFlowWrapper, options);
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error("Generated canvas is empty or invalid");
+      }
 
-      // Create download link with timestamp
       const link = document.createElement("a");
       const now = new Date();
       const timestamp = now.toISOString().slice(0, 19).replace(/[:.]/g, "-");
 
-      link.download = `json-tree-${timestamp}.png`;
-      link.href = canvas.toDataURL("image/png", 1.0);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            throw new Error("Failed to create image blob");
+          }
 
-      // Trigger download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+          const url = URL.createObjectURL(blob);
+          link.download = `json-tree-${timestamp}.png`;
+          link.href = url;
 
-      // Show success message
-      downloadButton.textContent = "✅ Downloaded!";
-      downloadButton.style.backgroundColor = "#4caf50";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+          // Show success message
+          if (downloadButton) {
+            downloadButton.textContent = "✅ Downloaded!";
+            downloadButton.style.backgroundColor = "#4caf50";
+            downloadButton.style.color = "white";
+          }
+        },
+        "image/png",
+        0.95
+      );
 
       // Reset button after 2 seconds
       setTimeout(() => {
-        downloadButton.textContent = originalText;
-        downloadButton.disabled = false;
-        downloadButton.style.backgroundColor = "";
+        if (downloadButton) {
+          downloadButton.textContent = originalText;
+          downloadButton.disabled = false;
+          downloadButton.style.backgroundColor = "";
+          downloadButton.style.color = "";
+        }
       }, 2000);
     } catch (error) {
       console.error("Error generating image:", error);
 
-      // Show user-friendly error message
       let errorMessage = "Failed to generate image. ";
-      if (error.message.includes("canvas")) {
+
+      if (error.message.includes("canvas") || error.message.includes("empty")) {
         errorMessage +=
-          "Canvas rendering failed. Try a smaller tree or refresh the page.";
-      } else if (error.message.includes("cross-origin")) {
+          "Canvas rendering failed. Try zooming to fit the tree or refresh the page.";
+      } else if (
+        error.message.includes("cross-origin") ||
+        error.message.includes("taint")
+      ) {
+        errorMessage += "Security restriction. Try refreshing the page.";
+      } else if (error.message.includes("timeout")) {
+        errorMessage += "Generation timed out. Try with a smaller tree.";
+      } else if (error.message.includes("blob")) {
         errorMessage +=
-          "Security restriction encountered. Try refreshing the page.";
+          "Image creation failed. Your browser may not support this feature.";
       } else {
-        errorMessage += "Please try again or check the console for details.";
+        errorMessage += `Error: ${error.message}`;
       }
 
       alert(errorMessage);
@@ -215,16 +268,26 @@ function App() {
       // Reset button
       const downloadButton =
         document.getElementById("download-btn") ||
-        document.querySelector(".btn-action");
-      downloadButton.textContent = "Failed - Try Again";
-      downloadButton.disabled = false;
-      downloadButton.style.backgroundColor = "#f44336";
+        document.querySelector(".btn-action") ||
+        Array.from(document.querySelectorAll("button")).find(
+          (btn) =>
+            btn.textContent.includes("Download") ||
+            btn.textContent.includes("Failed")
+        );
 
-      // Reset button text after 3 seconds
-      setTimeout(() => {
-        downloadButton.textContent = "Download Image";
-        downloadButton.style.backgroundColor = "";
-      }, 3000);
+      if (downloadButton) {
+        downloadButton.textContent = "❌ Failed - Try Again";
+        downloadButton.disabled = false;
+        downloadButton.style.backgroundColor = "#f44336";
+        downloadButton.style.color = "white";
+
+        // Reset button text after 3 seconds
+        setTimeout(() => {
+          downloadButton.textContent = "Download Image";
+          downloadButton.style.backgroundColor = "";
+          downloadButton.style.color = "";
+        }, 3000);
+      }
     }
   };
 
