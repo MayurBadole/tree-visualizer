@@ -1,4 +1,17 @@
-const SAMPLE_JSON = ``;
+const SAMPLE_JSON = `{
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "address": {
+      "street": "123 Main St",
+      "city": "New York",
+      "zipcode": "10001"
+    },
+    "isActive": true
+  },
+  "total": 1029.98
+}`;
 
 export const NODE_COLORS = {
   object: {

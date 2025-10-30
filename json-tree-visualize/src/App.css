@@ -182,7 +182,8 @@ button {
 .btn-primary,
 .btn-secondary,
 .btn-search,
-.btn-action {
+.btn-action,
+.btn-sample {
   padding: 10px 16px;
   border: none;
   border-radius: 6px;
@@ -268,6 +269,26 @@ button:active {
 .dark-mode .btn-action:disabled {
   background: #333;
   color: #888;
+}
+
+.btn-sample {
+  width: 100%;
+  background: #ff9800;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.btn-sample:hover {
+  background: #f57c00;
+}
+
+.dark-mode .btn-sample {
+  background: #ff9800;
+  color: #fff;
+}
+
+.dark-mode .btn-sample:hover {
+  background: #f57c00;
 }
 
 /* ============================================

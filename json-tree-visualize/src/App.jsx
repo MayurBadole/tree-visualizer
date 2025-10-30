@@ -9,7 +9,7 @@ import "./App.css";
 import Canvas from "./Canvas/Canvas";
 
 function App() {
-  const [jsonInput, setJsonInput] = useState(SAMPLE_JSON);
+  const [jsonInput, setJsonInput] = useState("");
   const [error, setError] = useState("");
   const [searchPath, setSearchPath] = useState("");
   const [searchMessage, setSearchMessage] = useState("");
@@ -20,6 +20,12 @@ function App() {
   const handleVisualize = () => {
     setError("");
     setSearchMessage("");
+    if (!jsonInput || !jsonInput.trim()) {
+      setError("Please enter valid JSON data to visualize");
+      setNodes([]);
+      setEdges([]);
+      return;
+    }
 
     try {
       const parsed = JSON.parse(jsonInput);
@@ -103,6 +109,12 @@ function App() {
     setEdges([]);
     setError("");
     setSearchPath("");
+    setSearchMessage("");
+  };
+
+  const handleLoadSample = () => {
+    setJsonInput(SAMPLE_JSON);
+    setError("");
     setSearchMessage("");
   };
 
@@ -226,7 +238,7 @@ function App() {
   };
 
   useEffect(() => {
-    handleVisualize();
+    // Start with empty canvas - user must load sample or enter JSON
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -241,6 +253,7 @@ function App() {
         searchMessage={searchMessage}
         onVisualize={handleVisualize}
         onClear={handleClear}
+        onLoadSample={handleLoadSample}
         onSearch={handleSearch}
         onDownload={handleDownloadImage}
         darkMode={darkMode}

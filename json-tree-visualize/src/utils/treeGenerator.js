@@ -112,7 +112,7 @@ export const generateTreeData = (
         data: nodeData,
         position: { x: 0, y: 0 },
       });
-      if (pId !== null) {
+      if (pId !== null && pId !== undefined && currentId !== undefined) {
         treeEdges.push({
           id: `edge-${pId}-${currentId}`,
           source: pId,

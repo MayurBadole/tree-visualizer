@@ -15,6 +15,7 @@ const Sidebar = ({
   searchMessage,
   onVisualize,
   onClear,
+  onLoadSample,
   onSearch,
   onDownload,
   darkMode,
@@ -31,6 +32,7 @@ const Sidebar = ({
       <ActionButtons
         onVisualize={onVisualize}
         onClear={onClear}
+        onLoadSample={onLoadSample}
         onDownload={onDownload}
       />
       <SearchBar
