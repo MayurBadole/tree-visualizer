@@ -1,38 +1,655 @@
-.App {
-  text-align: center;
+/* src/App.css - Complete Styling for JSON Tree Visualizer */
+
+/* ============================================
+   GLOBAL STYLES
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  overflow: hidden;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* ============================================
+   APP CONTAINER
+   ============================================ */
+.app-container {
   display: flex;
-  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f5f5f5;
+  color: #000;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.app-container.dark-mode {
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+/* ============================================
+   SIDEBAR STYLES
+   ============================================ */
+.sidebar {
+  width: 350px;
+  min-width: 350px;
+  background: #fff;
+  border-right: 1px solid #ddd;
+  padding: 20px;
+  overflow-y: auto;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.dark-mode .sidebar {
+  background: #2a2a2a;
+  border-right-color: #444;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin-bottom: 20px;
+  gap: 10px;
 }
 
-.App-link {
-  color: #61dafb;
+.header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: inherit;
+  margin: 0;
 }
 
-@keyframes App-logo-spin {
+/* ============================================
+   THEME TOGGLE
+   ============================================ */
+.theme-toggle {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #eee;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 0.2s, transform 0.1s;
+  min-width: 40px;
+}
+
+.theme-toggle:hover {
+  background: #ddd;
+  transform: scale(1.05);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+.dark-mode .theme-toggle {
+  background: #444;
+}
+
+.dark-mode .theme-toggle:hover {
+  background: #555;
+}
+
+/* ============================================
+   INPUT GROUPS
+   ============================================ */
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: inherit;
+}
+
+/* ============================================
+   TEXT AREA & INPUT
+   ============================================ */
+.json-textarea,
+.search-input,
+.format-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: "Courier New", "Consolas", monospace;
+  font-size: 12px;
+  transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+  outline: none;
+}
+
+.format-select {
+  font-family: inherit;
+  cursor: pointer;
+  background-color: #fff;
+}
+
+.json-textarea {
+  height: 200px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.json-textarea:focus,
+.search-input:focus,
+.format-select:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.dark-mode .json-textarea,
+.dark-mode .search-input,
+.dark-mode .format-select {
+  background: #1a1a1a;
+  color: #fff;
+  border-color: #444;
+}
+
+.dark-mode .json-textarea:focus,
+.dark-mode .search-input:focus,
+.dark-mode .format-select:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+button {
+  font-family: inherit;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-search,
+.btn-action {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  flex: 1;
+  background: #1976d2;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #1565c0;
+}
+
+.btn-secondary {
+  flex: 1;
+  background: #e0e0e0;
+  color: #000;
+}
+
+.btn-secondary:hover {
+  background: #d5d5d5;
+}
+
+.dark-mode .btn-secondary {
+  background: #444;
+  color: #fff;
+}
+
+.dark-mode .btn-secondary:hover {
+  background: #555;
+}
+
+.btn-search {
+  width: 100%;
+  background: #388e3c;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.btn-search:hover {
+  background: #2e7d32;
+}
+
+.btn-action {
+  width: 100%;
+  background: #7c4dff;
+  color: #fff;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+  background: #6a3de8;
+}
+
+.btn-action:disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-action:disabled:hover {
+  background: #ccc;
+  transform: none;
+}
+
+.dark-mode .btn-action:disabled {
+  background: #333;
+  color: #888;
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+.action-buttons {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* ============================================
+   ERROR MESSAGE
+   ============================================ */
+.error-message {
+  padding: 12px;
+  background: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #c62828;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ============================================
+   SEARCH MESSAGE
+   ============================================ */
+.search-message {
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: 600;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(-5px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-message.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #2e7d32;
+}
+
+.search-message.warning {
+  background: #fff3e0;
+  color: #e65100;
+  border-left: 4px solid #e65100;
+}
+
+/* ============================================
+   LEGEND
+   ============================================ */
+.legend {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.dark-mode .legend {
+  background: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.legend h3 {
+  font-size: 14px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.legend-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 2px solid;
+  flex-shrink: 0;
+}
+
+.legend-item span {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ============================================
+   INSTRUCTIONS
+   ============================================ */
+.instructions {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.dark-mode .instructions {
+  background: #1a1a1a;
+  border: 1px solid #333;
+}
+
+.instructions h3 {
+  font-size: 14px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.instructions ul {
+  margin-left: 20px;
+  padding-left: 0;
+}
+
+.instructions li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+  color: inherit;
+}
+
+.instructions li:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   CANVAS CONTAINER
+   ============================================ */
+.canvas-container {
+  flex: 1;
+  position: relative;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  transition: background-color 0.3s;
+}
+
+.dark-mode .canvas-container {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+}
+
+/* ============================================
+   REACT FLOW CUSTOMIZATIONS
+   ============================================ */
+.react-flow {
+  background: transparent;
+}
+
+.react-flow__node {
+  cursor: pointer;
+}
+
+/* Edge styling for tree connections */
+.react-flow__edge {
+  stroke-width: 3px !important;
+  stroke: #000000 !important;
+}
+
+.react-flow__edge-path {
+  stroke-width: 3px !important;
+  stroke: #000000 !important;
+}
+
+.react-flow__edge .react-flow__edge-path {
+  stroke: #000000 !important;
+  stroke-width: 3px !important;
+}
+
+.dark-mode .react-flow__edge .react-flow__edge-path {
+  stroke: #ffffff !important;
+}
+
+.dark-mode .react-flow__edge {
+  stroke: #ffffff !important;
+}
+
+.react-flow__arrowhead {
+  fill: #000000 !important;
+}
+
+.dark-mode .react-flow__arrowhead {
+  fill: #ffffff !important;
+}
+
+/* Additional edge styling for better tree visualization */
+.react-flow__edges {
+  pointer-events: all !important;
+}
+
+.react-flow__edge {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+.react-flow__edge-path {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Ensure markers (arrows) are visible */
+.react-flow__arrowhead {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Override any potential hiding styles */
+svg .react-flow__edge,
+svg .react-flow__edge-path {
+  stroke-opacity: 1 !important;
+  fill-opacity: 1 !important;
+}
+
+.react-flow__controls {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .react-flow__controls {
+  background: rgba(42, 42, 42, 0.9);
+  border: 1px solid #444;
+}
+
+.react-flow__controls button {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dark-mode .react-flow__controls button {
+  border-bottom: 1px solid #444;
+  background: transparent;
+  color: #fff;
+}
+
+.react-flow__attribution {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.dark-mode .react-flow__attribution {
+  background: rgba(0, 0, 0, 0.5);
+  color: #999;
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.dark-mode .sidebar::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.dark-mode .sidebar::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+.dark-mode .sidebar::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    max-height: 50vh;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .dark-mode .sidebar {
+    border-bottom-color: #444;
+  }
+
+  .canvas-container {
+    height: 50vh;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+
+  .json-textarea {
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 16px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   TRANSITIONS & ANIMATIONS
+   ============================================ */
+.react-flow__node {
+  transition: all 0.2s ease;
+}
+
+.react-flow__edge {
+  transition: all 0.2s ease;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.hidden {
+  display: none !important;
+}
+
+.visible {
+  display: block !important;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+  .sidebar {
+    display: none;
+  }
+
+  .canvas-container {
+    width: 100%;
+    height: 100vh;
   }
 }
