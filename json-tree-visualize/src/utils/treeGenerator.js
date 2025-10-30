@@ -92,7 +92,8 @@ export const generateTreeData = (
 
       Object.entries(obj).forEach(([key, value]) => {
         traverse(value, `${path}.${key}`, currentId, level + 1);
-      });    } else {
+      });
+    } else {
       const key = path
         .split(".")
         .pop()
@@ -111,7 +112,7 @@ export const generateTreeData = (
         data: nodeData,
         position: { x: 0, y: 0 },
       });
-      if (pId !== null && pId !== undefined && currentId !== undefined) {
+      if (pId !== null) {
         treeEdges.push({
           id: `edge-${pId}-${currentId}`,
           source: pId,
